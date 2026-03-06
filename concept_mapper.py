@@ -1,26 +1,28 @@
 import spacy
-from collections import Counter
 
-nlp = spacy.load("en_core_web_sm")
+# Load spaCy model safely
+def load_spacy_model():
+    try:
+        return spacy.load("en_core_web_sm")
+    except OSError:
+        from spacy.cli import download
+        download("en_core_web_sm")
+        return spacy.load("en_core_web_sm")
 
-def extract_concepts(text, top_n=10):
-    doc = nlp(text)
-
-    keywords = [
-        token.text.lower()
-        for token in doc
-        if token.pos_ in ["NOUN", "PROPN"] and not token.is_stop
-    ]
-
-    freq = Counter(keywords)
-    return freq.most_common(top_n)
-
+nlp = load_spacy_model()
 
 def generate_concept_map(text):
-    concepts = extract_concepts(text)
+    doc = nlp(text)
 
-    concept_map = "🧩 Key Concepts:\n\n"
-    for word, count in concepts:
-        concept_map += f"- {word} (importance: {count})\n"
+    concepts = set()
 
-    return concept_map
+    # Extract named entities
+    for ent in doc.ents:
+        concepts.add(ent.text)
+
+    # Extract important nouns
+    for token in doc:
+        if token.pos_ in ["NOUN", "PROPN"] and len(token.text) > 3:
+            concepts.add(token.text)
+
+    return list(concepts)
