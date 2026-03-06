@@ -8,3 +8,4 @@ requests
 validators
 streamlit-lottie
 beautifulsoup4
+gtts
