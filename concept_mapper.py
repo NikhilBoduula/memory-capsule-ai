@@ -1,28 +1,24 @@
-import spacy
-
-# Load spaCy model safely
-def load_spacy_model():
-    try:
-        return spacy.load("en_core_web_sm")
-    except OSError:
-        from spacy.cli import download
-        download("en_core_web_sm")
-        return spacy.load("en_core_web_sm")
-
-nlp = load_spacy_model()
+import re
+from collections import Counter
 
 def generate_concept_map(text):
-    doc = nlp(text)
 
-    concepts = set()
+    # simple word cleaning
+    words = re.findall(r'\b[a-zA-Z]{4,}\b', text.lower())
 
-    # Extract named entities
-    for ent in doc.ents:
-        concepts.add(ent.text)
+    # remove common words
+    stop_words = {
+        "this","that","with","from","have","will","your","about",
+        "there","their","which","when","where","what","these",
+        "those","been","being","into","than","them","they",
+        "would","could","should","while","after","before"
+    }
 
-    # Extract important nouns
-    for token in doc:
-        if token.pos_ in ["NOUN", "PROPN"] and len(token.text) > 3:
-            concepts.add(token.text)
+    filtered_words = [w for w in words if w not in stop_words]
 
-    return list(concepts)
+    # count important words
+    most_common = Counter(filtered_words).most_common(10)
+
+    concepts = [word for word, count in most_common]
+
+    return concepts
