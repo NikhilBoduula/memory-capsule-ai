@@ -1,0 +1,10 @@
+streamlit
+transformers
+torch
+sentence-transformers
+scikit-learn
+numpy
+requests
+validators
+streamlit-lottie
+beautifulsoup4
